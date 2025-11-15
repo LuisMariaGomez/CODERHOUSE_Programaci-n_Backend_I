@@ -5,28 +5,11 @@ const PORT = 8080;
 
 app.use(express.json());
 
-// Controladores simples para id de productos y carritos
-
-let lastProductId = 0;
-
-function generateProductId() {
-  lastProductId++;
-  return lastProductId;
-}
-
-let lastCartId = 0;
-
-function generateCartId() {
-  lastCartId++;
-  return lastCartId;
-}
-
-
 // "Base de datos"
 
 let products = [
   {
-    id: "1",
+    id: 1,
     title: "Camiseta Negra",
     description: "Camiseta de algodón 100% color negro.",
     code: "C001",
@@ -37,7 +20,7 @@ let products = [
     thumbnails: ["/img/camiseta-negra.png"]
   },
   {
-    id: "2",
+    id: 2,
     title: "Pantalón Jeans",
     description: "Pantalón denim azul estilo clásico.",
     code: "P001",
@@ -51,6 +34,29 @@ let products = [
 
 let carts = []; // { id, products: [ { product, quantity } ] }
 
+
+// Controladores simples para id de productos y carritos
+
+let lastProductId = products.length;
+
+function generateProductId() {
+  lastProductId++;
+  return lastProductId;
+}
+
+let lastCartId = 0;
+
+function generateCartId() {
+  lastCartId++;
+  return lastCartId;
+}
+
+// Rutas
+
+app.get('/', (req, res) => { 
+  res.send('Servidor ejecutándose en http://localhost:8080');
+ });
+
 // Rutas de productos
 
 app.get('/api/products', (req, res) => {
@@ -58,7 +64,9 @@ app.get('/api/products', (req, res) => {
 });
 
 app.get('/api/products/:pid', (req, res) => {
-  const product = products.find(p => p.id === req.params.pid);
+  const pid = Number(req.params.pid);   // <--- convertir a número SI o SI
+
+  const product = products.find(p => p.id === pid);
 
   if (!product) {
     return res.status(404).json({ error: "Producto no encontrado" });
@@ -66,6 +74,8 @@ app.get('/api/products/:pid', (req, res) => {
 
   res.json(product);
 });
+
+
 
 app.post('/api/products', (req, res) => {
   const required = ["title","description","code","price","status","stock","category","thumbnails"]; //para no tener que poner uno por uno los campos en if's y que diga que falta ese en particular
@@ -86,29 +96,35 @@ app.post('/api/products', (req, res) => {
 });
 
 app.put('/api/products/:pid', (req, res) => {
-  const indice = products.findIndex(p => p.id === req.params.pid); // Busco el indice, si no lo encuentra devuelve -1
+  const pid = Number(req.params.pid);
+
+  const indice = products.findIndex(p => p.id === pid);
 
   if (indice === -1) {
     return res.status(404).json({ error: "Producto no encontrado" });
   }
 
   const product_mod = { ...products[indice], ...req.body };
-  product_mod.id = products[indice].id; // El id no se modifica
+  product_mod.id = products[indice].id; // No modificar el id
 
   products[indice] = product_mod;
 
   res.json(product_mod);
 });
 
+
 app.delete('/api/products/:pid', (req, res) => {
-  const initialLength = products.length;
-  products = products.filter(p => p.id !== req.params.pid);
+    const pid = Number(req.params.pid);
 
-  if (products.length === initialLength) {
-    return res.status(404).json({ error: "Producto no encontrado" });
-  }
+    const initialLength = products.length;
 
-  res.json({ message: "Producto eliminado" });
+    products = products.filter(p => p.id !== pid);
+
+    if (products.length === initialLength) {
+        return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    res.json({ message: "Producto eliminado" });
 });
 
 // Rutas de carritos
@@ -124,37 +140,42 @@ app.post('/api/carts', (req, res) => {
 });
 
 app.get('/api/carts/:cid', (req, res) => {
-  const cart = carts.find(c => c.id === req.params.cid);
+    const cid = Number(req.params.cid);
+    const cart = carts.find(c => c.id === cid);
 
-  if (!cart) {
-    return res.status(404).json({ error: "Carrito no encontrado" });
-  }
+    if (!cart) {
+        return res.status(404).json({ error: "Carrito no encontrado" });
+    }
 
-  res.json(cart.products);
+    res.json(cart.products);
 });
 
 app.post('/api/carts/:cid/product/:pid', (req, res) => {
-  const cart = carts.find(c => c.id === req.params.cid);
+    const cid = Number(req.params.cid);
 
-  if (!cart) {
-    return res.status(404).json({ error: "Carrito no encontrado" });
-  }
+    const cart = carts.find(c => c.id === cid);
 
-  const product = products.find(p => p.id === req.params.pid);
+    if (!cart) {
+        return res.status(404).json({ error: "Carrito no encontrado" });
+    }
 
-  if (!product) {
-    return res.status(404).json({ error: "Producto no existe" });
-  }
+    const pid = Number(req.params.pid);
 
-  const existing = cart.products.find(p => p.product === req.params.pid);
+    const product = products.find(p => p.id === pid);
 
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.products.push({ product: req.params.pid, quantity: 1 });
-  }
+    if (!product) {
+        return res.status(404).json({ error: "Producto no existe" });
+    }
 
-  res.json(cart);
+    const existing = cart.products.find(p => p.product === pid);
+
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.products.push({ product: pid, quantity: 1 });
+    }
+
+    res.json(cart);
 });
 
 // -------------------------------------------------------
