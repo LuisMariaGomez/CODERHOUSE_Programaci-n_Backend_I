@@ -1,0 +1,24 @@
+{
+  "name": "coderhouse_programaci-n_backend_i",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LuisMariaGomez/CODERHOUSE_Programaci-n_Backend_I.git"
+  },
+  "keywords": [],
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LuisMariaGomez/CODERHOUSE_Programaci-n_Backend_I/issues"
+  },
+  "homepage": "https://github.com/LuisMariaGomez/CODERHOUSE_Programaci-n_Backend_I#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
